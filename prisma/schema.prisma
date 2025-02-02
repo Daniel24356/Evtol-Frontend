@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum USER_ROLE {
+  ADMIN
+  USER
+}
+
+enum EVTOL_MODEL {
+  LIGHTWEIGHT
+  MIDDLEWEIGHT
+  CRUISERWEIGHT
+  HEAVYWEIGHT
+}
+
+enum EVTOL_STATE {
+  IDLE
+  LOADING
+  LOADED
+  DELIVERING
+  DELIVERED
+  RETURNING
+}
+
+model User {
+  id             Int       @id @default(autoincrement())
+  email          String    @unique
+  password       String?
+  firstName      String?
+  lastName       String?
+  role           USER_ROLE @default(USER)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now())
+}
+
+model Evtol {
+  id               Int          @id @default(autoincrement())
+  serialNumber     String       @unique
+  model           EVTOL_MODEL
+  state           EVTOL_STATE
+  weightLimit     Int
+  batteryCapacity Int
+  medications     Medication[] @relation("EvtolMedications")
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  BatteryLog BatteryLog[]
+}
+
+model Medication {
+  id           Int              @id @default(autoincrement())
+  name         String
+  weight       Int
+  code         Int
+  imageUrl     String
+  evtols       Evtol[] @relation("EvtolMedications") 
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+model BatteryLog {
+  id         Int      @id @default(autoincrement())
+  evtolId    Int
+  evtol      Evtol    @relation(fields: [evtolId], references: [id], onDelete: Cascade)
+  level      Int      // Battery level at the time of log
+  createdAt  DateTime @default(now())
+}
+
+
