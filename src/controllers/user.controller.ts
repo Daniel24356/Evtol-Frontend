@@ -3,7 +3,6 @@ import { UserServiceImpl } from "../service/implementation/user-service.implemen
 import { CreateUserDTO } from "../dto/createUser.dto";
 import { CustomRequest } from "../Middleware/auth.middleware";
 import { StatusCodes } from "http-status-codes";
-import { ChangePasswordDTO } from "../dto/resetPassword.auth.dto";
 
 
 export class UserController {
@@ -106,64 +105,4 @@ export class UserController {
         }
     }
 
-    public updateProfilePic = async (
-        req: CustomRequest,
-        res: Response,
-        next: NextFunction
-      ): Promise<void> => {
-        try {
-          const userId = req.userAuth; 
-
-          console.log("Decoded User ID:", req.userAuth);
-
-          if (!userId) {
-            res.status(401).json({
-              error: true,
-              message: "Unauthorized. User ID missing in token.",
-            });
-            return;
-          }
-         
-          if (!req.file || !req.file.path) {
-            res.status(400).json({
-              error: true,
-              message: "No profile image uploaded",
-            });
-            return;
-          }
-
-          console.log("Uploaded file details:", req.file);
-      
-          const profilePicUrl = req.file.path; // Cloudinary URL after upload
-          await this.userService.updateProfilePic(Number(userId), {
-            profilePic: profilePicUrl,
-          });
-      
-          res.status(200).json({
-            error: false,
-            message: "Profile picture updated successfully",
-            data: { profilePic: profilePicUrl },
-          });
-        } catch (error) {
-          next(error);
-        }
-      };
-
-      public setPassword = async (
-        req: CustomRequest,
-        res: Response,
-        next: NextFunction
-      ): Promise<void> => {
-        try{
-          const id = req.userAuth;
-          const data = req.body as ChangePasswordDTO;
-          await this.userService.setPassword(Number(id), data);
-          res.status(StatusCodes.OK).json({
-            error: false,
-            message: "Password changed successfully",
-          })
-        }catch(error){
-          next(error)
-        }
-      }
 }

@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes"
 import { CustomError } from "../exceptions/error/customError.error"
 import { db } from "../configs/db"
-import { Role } from "@prisma/client"
+import { USER_ROLE } from "@prisma/client"
 import { NextFunction, Request, Response } from "express"
 import { CustomRequest } from "./auth.middleware"
 
@@ -22,7 +22,7 @@ export const isAdmin = async (
         if(!user){
           throw new CustomError(StatusCodes.NOT_FOUND, "user not found")
         }
-        if(user.role === Role.ADMIN){
+        if(user.role === USER_ROLE.ADMIN){
            next()
         } else{
          throw new CustomError(StatusCodes.FORBIDDEN, "Access denied")

@@ -1,0 +1,20 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const user_controller_1 = require("../controllers/user.controller");
+const auth_middleware_1 = require("../Middleware/auth.middleware");
+const isAdmin_middleware_1 = require("../Middleware/isAdmin.middleware");
+// import { uploadToCloudinaryProfileImage } from "../configs/cloudinary.config";
+const userController = new user_controller_1.UserController();
+const userRouter = express_1.default.Router();
+userRouter.post("/", userController.createUser);
+userRouter.get("/", auth_middleware_1.authenticateUser, isAdmin_middleware_1.isAdmin, userController.getAllUsers);
+userRouter.get("/:id", auth_middleware_1.authenticateUser, userController.getUserById);
+userRouter.patch("/:id", auth_middleware_1.authenticateUser, userController.updateUsers);
+userRouter.delete("/:id", auth_middleware_1.authenticateUser, userController.deleteUsers);
+userRouter.get("/auth/profile", auth_middleware_1.authenticateUser, userController.profile);
+// userRouter.put( "/profile-pic",authenticateUser, uploadToCloudinaryProfileImage, userController.updateProfilePic);
+exports.default = userRouter;

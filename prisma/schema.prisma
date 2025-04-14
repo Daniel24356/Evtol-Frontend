@@ -32,6 +32,7 @@ enum EVTOL_STATE {
   DELIVERING
   DELIVERED
   RETURNING
+  EMERGENCY_LANDING
 }
 
 model User {
@@ -43,6 +44,8 @@ model User {
   role           USER_ROLE @default(USER)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @default(now())
+
+  LoadedMedication LoadedMedication[]
 }
 
 model Evtol {
@@ -51,12 +54,19 @@ model Evtol {
   model           EVTOL_MODEL
   state           EVTOL_STATE
   weightLimit     Int
-  batteryCapacity Int
+  batteryCapacity Float  @default(100.0) 
+  latitude        Float  @default(0.0)
+  longitude       Float  @default(0.0)
   medications     Medication[] @relation("EvtolMedications")
+  isCharging      Boolean @default(true)
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
   BatteryLog BatteryLog[]
+
+  LoadedMedication LoadedMedication[]
+
+  Delivery Delivery[]
 }
 
 model Medication {
@@ -68,7 +78,22 @@ model Medication {
   evtols       Evtol[] @relation("EvtolMedications") 
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
+
+  LoadedMedication LoadedMedication[]
 }
+
+model LoadedMedication {
+  id              Int         @id @default(autoincrement())
+  evtolId        Int
+  medicationId   Int
+  loadedByUserId Int
+  loadedAt       DateTime @default(now())
+
+  evtol          Evtol    @relation(fields: [evtolId], references: [id], onDelete: Cascade)
+  medication     Medication @relation(fields: [medicationId], references: [id], onDelete: Cascade)
+  loadedBy       User    @relation(fields: [loadedByUserId], references: [id], onDelete: Cascade)
+}
+
 
 model BatteryLog {
   id         Int      @id @default(autoincrement())
@@ -76,6 +101,23 @@ model BatteryLog {
   evtol      Evtol    @relation(fields: [evtolId], references: [id], onDelete: Cascade)
   level      Int      // Battery level at the time of log
   createdAt  DateTime @default(now())
+}
+
+model ChargingStation {
+  id        String   @id @default(uuid())
+  name      String
+  latitude  Float
+  longitude Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Delivery {
+  id          String   @id @default(uuid())
+  evtolId     String   @unique
+  evtol       Evtol    @relation(fields: [evtolId], references: [serialNumber])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 

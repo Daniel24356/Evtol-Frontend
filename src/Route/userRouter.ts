@@ -14,6 +14,6 @@ userRouter.patch("/:id", authenticateUser, userController.updateUsers);
 userRouter.delete("/:id", authenticateUser, userController.deleteUsers)
 userRouter.get("/auth/profile", authenticateUser, userController.profile)
 // userRouter.put( "/profile-pic",authenticateUser, uploadToCloudinaryProfileImage, userController.updateProfilePic);
-userRouter.post("/change-password", authenticateUser, userController.setPassword)
+
 
 export default userRouter;

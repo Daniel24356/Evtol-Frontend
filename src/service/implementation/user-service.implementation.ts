@@ -35,7 +35,7 @@ export class UserServiceImpl implements UserService{
     async getUserById(id: number): Promise<User | null>{
         const user = await db.user.findUnique({
             where:{
-              id,
+                id: Number(id),
             }
         })
        if(!user){

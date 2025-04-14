@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import { EvtolServiceImpl } from "../service/implementation/evtol-service.implementation";
 import { EvtolDetailDTO } from "../dto/evtolDetail.dto";
 import { MedicationDTO } from "../dto/medication.dto";
+import { CustomRequest } from "../Middleware/auth.middleware";
+import { CustomError } from "../exceptions/error/customError.error";
 
 
 export class EvtolController {
@@ -39,20 +41,26 @@ export class EvtolController {
     }
 
     public loadEvtol = async (
-        req: Request,
+        req: CustomRequest,
         res: Response,
         next: NextFunction
     ): Promise<void> => {
         try {
             const { serialNumber, medications } = req.body;
+            const userId = Number(req.userAuth); // Convert to number
+            
+            if (isNaN(userId)) {
+                throw new CustomError(401, "Unauthorized: Invalid user ID");
+            }
     
             // Call service to load the medications based on the passed IDs
-            const updatedEvtol = await this.evtolService.loadEvtol(serialNumber, medications);
+            const updatedEvtol = await this.evtolService.loadEvtol(serialNumber, medications, userId);
             res.status(200).json(updatedEvtol);
         } catch (error) {
             next(error);
         }
-    }
+    };
+    
 
     public checkLoadedEvtolItems = async (
         req: Request,
@@ -95,6 +103,15 @@ export class EvtolController {
             res.status(200).json(updatedEvtol);
         } catch (error) {   
                 next(error);
+        }
+    };
+
+    public getLoadedMedications = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const loadedMedications = await this.evtolService.getLoadedMedications();
+            res.status(200).json(loadedMedications);
+        } catch (error) {
+            next(error);
         }
     };
 }
